@@ -44,7 +44,7 @@ class EnvironmentProvisioner:
         # Install the Helm Chart into the cluster
         self._cluster_interface.install_chart(
             branch, self._kubeconfig_file, env.get_helm_repository(), version,
-            self._infrastructure_provisioner.get_terraform_output("service_account_role_arn", "raw"),
+            self._infrastructure_provisioner.get_infrastructure_terraform_output("service_account_role_arn", "raw"),
             Path(self._manifests_path, f"{branch}/overrides.yaml")
         )
 
@@ -52,17 +52,27 @@ class EnvironmentProvisioner:
         self._infrastructure_provisioner.ensure_test_fixtures(env.get_cluster().serialise_to_json(),
                                                               env.get_vpc().get_id(), branch)
 
-    def destroy_test_environment(self, branch):
-        cluster_json = self._infrastructure_provisioner.get_terraform_output("cluster", "json")
-        vpc_id = self._infrastructure_provisioner.get_terraform_output("vpc_id", "json")
+    def destroy_test_environment(self):
+        cluster_json = self._infrastructure_provisioner.get_infrastructure_terraform_output("cluster", "json")
+        vpc_id = self._infrastructure_provisioner.get_infrastructure_terraform_output("vpc_id", "json")
+        branch = self._infrastructure_provisioner.get_test_fixture_terraform_output("namespace", "raw")
         self._infrastructure_provisioner.destroy_test_fixtures(cluster_json, vpc_id, branch)
         self._infrastructure_provisioner.destroy_base_infrastructure(branch)
 
 
 if __name__ == "__main__":
-    branch_name = sys.argv[1]
+    operation = sys.argv[1]
     kubeconfig_file = sys.argv[2]
     driver_repository_path = sys.argv[3]
 
     ep = EnvironmentProvisioner(kubeconfig_file, driver_repository_path)
-    ep.setup_test_environment(branch_name)
+
+    match operation:
+        case "build":
+            branch_name = sys.argv[4]
+            ep.setup_test_environment(branch_name)
+        case "destroy":
+            ep.destroy_test_environment()
+
+
+

@@ -56,7 +56,7 @@ resource "kubernetes_persistent_volume_claim" "efs_statically_provisioned" {
   }
 }
 
-resource "kubernetes_deployment" "root_access_deployment" {
+resource "kubernetes_deployment" "statically_provisioned_app" {
   depends_on = [kubernetes_persistent_volume_claim.efs_statically_provisioned]
   metadata {
     name = "statically-provisioned-app"

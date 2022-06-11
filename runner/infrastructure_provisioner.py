@@ -20,10 +20,10 @@ class InfrastructureProvisioner:
         for line in proc.stdout:
             print(line.decode("unicode_escape"), end='')
         return Environment(
-            Cluster(**json.loads(self.get_terraform_output("cluster", "json"))),
-            VirtualPrivateCloud(self.get_terraform_output("vpc_id", "raw")),
-            DockerRepository(self.get_terraform_output("docker_repository_url", "raw")),
-            HelmRepository(self.get_terraform_output("helm_repository_url", "raw"))
+            Cluster(**json.loads(self.get_infrastructure_terraform_output("cluster", "json"))),
+            VirtualPrivateCloud(self.get_infrastructure_terraform_output("vpc_id", "raw")),
+            DockerRepository(self.get_infrastructure_terraform_output("docker_repository_url", "raw")),
+            HelmRepository(self.get_infrastructure_terraform_output("helm_repository_url", "raw"))
         )
 
     def destroy_base_infrastructure(self, branch):
@@ -56,9 +56,15 @@ class InfrastructureProvisioner:
         for line in proc.stdout:
             print(line.decode("unicode_escape"), end='')
 
-    def get_terraform_output(self, output_variable_name, output_format):
+    def get_infrastructure_terraform_output(self, output_variable_name, output_format):
+        return self.get_terraform_output(self._infrastructure_directory, output_variable_name, output_format)
+
+    def get_test_fixture_terraform_output(self, output_variable_name, output_format):
+        return self.get_terraform_output(self._fixtures_directory, output_variable_name, output_format)
+
+    def get_terraform_output(self, directory, output_variable_name, output_format):
         proc = subprocess.run(
-            f"terraform -chdir=\"{self._infrastructure_directory}\" output -{output_format} {output_variable_name}",
+            f"terraform -chdir=\"{directory}\" output -{output_format} {output_variable_name}",
             shell=True, env=self._global_environment_variables, capture_output=True
         )
         return proc.stdout.strip().decode("utf-8")

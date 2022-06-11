@@ -39,7 +39,7 @@ resource "kubernetes_persistent_volume_claim" "efs_dynamically_provisioned" {
 
 
 
-resource "kubernetes_deployment" "root_access_deployment" {
+resource "kubernetes_deployment" "dynamically_provisioned_app" {
   depends_on = [kubernetes_persistent_volume_claim.efs_dynamically_provisioned]
   metadata {
     name = "dynamically-provisioned-app"
