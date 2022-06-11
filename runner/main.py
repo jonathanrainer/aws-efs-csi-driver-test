@@ -10,6 +10,7 @@ from infrastructure_provisioner import InfrastructureProvisioner
 class EnvironmentProvisioner:
     _kubeconfig_file = None
     _driver_repository_path = ""
+    _manifests_path = Path(os.path.dirname(os.path.abspath(__file__)), "..", "test-manifests")
 
     _helm_builder = HelmBuilder()
     _infrastructure_provisioner = InfrastructureProvisioner()
@@ -43,7 +44,8 @@ class EnvironmentProvisioner:
         # Install the Helm Chart into the cluster
         self._cluster_interface.install_chart(
             branch, self._kubeconfig_file, env.get_helm_repository(), version,
-            self._infrastructure_provisioner.get_terraform_output("service_account_role_arn", "raw")
+            self._infrastructure_provisioner.get_terraform_output("service_account_role_arn", "raw"),
+            Path(self._manifests_path, f"{branch}/overrides.yaml")
         )
 
         # Install the Text Fixtures on top (EFS etc.)
@@ -54,7 +56,7 @@ class EnvironmentProvisioner:
         cluster_json = self._infrastructure_provisioner.get_terraform_output("cluster", "json")
         vpc_id = self._infrastructure_provisioner.get_terraform_output("vpc_id", "json")
         self._infrastructure_provisioner.destroy_test_fixtures(cluster_json, vpc_id, branch)
-        self._infrastructure_provisioner.destroy_base_infrastructure()
+        self._infrastructure_provisioner.destroy_base_infrastructure(branch)
 
 
 if __name__ == "__main__":

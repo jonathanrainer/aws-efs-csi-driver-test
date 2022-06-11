@@ -21,13 +21,15 @@ class ClusterInterface:
         conf.use_context(cluster_name)
 
     @staticmethod
-    def install_chart(branch, kubeconfig: Path, helm_repository: HelmRepository, helm_version: str, service_account_role_arn: str):
+    def install_chart(branch, kubeconfig: Path, helm_repository: HelmRepository, helm_version: str,
+                      service_account_role_arn: str, extra_values_yaml: Path):
         helm_repository.authenticate_to_registry()
         subprocess.run(
             f"helm upgrade --kubeconfig {kubeconfig.absolute()} --kube-context aws-efs-csi-driver-test "
             f"--install aws-efs-csi-driver-{branch} --namespace {branch} --create-namespace --version {helm_version} "
             f"--set 'node.serviceAccount.annotations.eks\.amazonaws\.com/role-arn={service_account_role_arn}' "
             f"--set 'controller.serviceAccount.annotations.eks\.amazonaws\.com/role-arn={service_account_role_arn}' "
+            f"--set replicaCount=1 -f \"{extra_values_yaml.absolute()}\" "
             f"oci://{helm_repository.get_ecr_url()}aws-efs-csi-driver",
             shell=True
         )

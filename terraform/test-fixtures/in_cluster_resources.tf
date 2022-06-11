@@ -1,4 +1,5 @@
 resource "kubernetes_deployment" "root_access_deployment" {
+  depends_on = [kubernetes_persistent_volume_claim.efs_root]
   metadata {
     name = "test-ops"
     namespace = var.namespace
@@ -72,6 +73,7 @@ resource "kubernetes_storage_class" "static_provisioning_storage_class" {
 }
 
 resource "kubernetes_persistent_volume_claim" "efs_root" {
+  depends_on = [kubernetes_persistent_volume.efs_root]
   metadata {
     name = "efs-root"
     namespace = var.namespace
@@ -99,9 +101,6 @@ resource "kubernetes_storage_class" "dynamic_provisioning_storage_class" {
   metadata {
     name = "efs-dynamic"
   }
-  mount_options = [
-    "tls"
-  ]
   parameters = {
     provisioningMode = "efs-ap"
     fileSystemId = aws_efs_file_system.test-file-system.id
@@ -109,6 +108,6 @@ resource "kubernetes_storage_class" "dynamic_provisioning_storage_class" {
     gidRangeStart: "1000"
     gidRangeEnd: "2000"
     basePath: "/dynamic"
-    tags: "SCTag:'Look at the spaces'"
+    extraTags: "SCTag:'Look at the spaces'"
   }
 }

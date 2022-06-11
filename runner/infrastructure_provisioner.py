@@ -26,8 +26,9 @@ class InfrastructureProvisioner:
             HelmRepository(self.get_terraform_output("helm_repository_url", "raw"))
         )
 
-    def destroy_base_infrastructure(self):
-        proc = subprocess.Popen(f"terraform -chdir=\"{self._infrastructure_directory}\" destroy -auto-approve",
+    def destroy_base_infrastructure(self, branch):
+        proc = subprocess.Popen(f"terraform -chdir=\"{self._infrastructure_directory}\" destroy -auto-approve -var "
+                                f"namespace={branch}",
                                 shell=True,
                                 env=self._global_environment_variables, stdout=subprocess.PIPE,
                                 stderr=subprocess.STDOUT)

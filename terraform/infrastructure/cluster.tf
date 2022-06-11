@@ -57,7 +57,7 @@ module "eks" {
 
   eks_managed_node_group_defaults = {
     ami_type       = "AL2_x86_64"
-    instance_types = ["m6i.large", "m5.large", "m5n.large", "m5zn.large"]
+    instance_types = ["m5.large"]
     metadata_options = {
       http_endpoint =  "disabled"
     }
@@ -69,7 +69,7 @@ module "eks" {
       # so we need to disable it to use the default template provided by the AWS EKS managed node group service
       create_launch_template = false
       launch_template_name   = ""
-      desired_size = 3
+      desired_size = 2
       capacity_type  = "SPOT"
     }
   }
