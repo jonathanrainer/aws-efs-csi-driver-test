@@ -2,6 +2,9 @@ resource "kubernetes_storage_class" "dynamic_provisioning_storage_class" {
   storage_provisioner = "efs.csi.aws.com"
   metadata {
     name = "efs-dynamic"
+    labels = {
+      provisioning-type: "dynamic"
+    }
   }
   parameters = {
     provisioningMode = "efs-ap"
@@ -18,6 +21,9 @@ resource "kubernetes_persistent_volume_claim" "efs_dynamically_provisioned" {
   metadata {
     name      = "efs-dynamically-provisioned"
     namespace = var.namespace
+    labels = {
+      provisioning-type: "dynamic"
+    }
   }
   spec {
     access_modes = [
@@ -45,20 +51,22 @@ resource "kubernetes_deployment" "dynamically_provisioned_app" {
     name = "dynamically-provisioned-app"
     namespace = var.namespace
     labels = {
-      app = "dynamic"
+      app = "dynamo"
+      provisioning-type: "dynamic"
     }
   }
   spec {
     replicas = 1
     selector {
       match_labels = {
-        app = "dynamic"
+        app = "dynamo"
       }
     }
     template {
       metadata {
         labels = {
-          app = "dynamic"
+          app = "dynamo"
+          provisioning-type: "dynamic"
         }
       }
       spec {

@@ -3,7 +3,7 @@ resource "kubernetes_storage_class" "static_provisioning_storage_class" {
   metadata {
     name = "efs-static"
     labels = {
-      "provisioning-type": "static"
+      provisioning-type: "static"
     }
   }
 }
@@ -12,7 +12,7 @@ resource "kubernetes_persistent_volume" "efs_statically_provisioned" {
   metadata {
     name = "efs-statically-provisioned"
     labels = {
-      "provisioning-type": "static"
+      provisioning-type: "static"
     }
   }
   spec {
@@ -37,6 +37,9 @@ resource "kubernetes_persistent_volume_claim" "efs_statically_provisioned" {
   metadata {
     name = "efs-statically-provisioned"
     namespace = var.namespace
+    labels = {
+      provisioning-type: "static"
+    }
   }
   spec {
     access_modes = [
@@ -50,7 +53,7 @@ resource "kubernetes_persistent_volume_claim" "efs_statically_provisioned" {
     }
     selector {
       match_labels = {
-        "access": "root"
+        provisioning-type: "static"
       }
     }
   }
@@ -62,20 +65,22 @@ resource "kubernetes_deployment" "statically_provisioned_app" {
     name = "statically-provisioned-app"
     namespace = var.namespace
     labels = {
-      app = "static"
+      app = "stasis"
+      provisioning-type: "static"
     }
   }
   spec {
     replicas = 1
     selector {
       match_labels = {
-        app = "static"
+        app = "stasis"
       }
     }
     template {
       metadata {
         labels = {
-          app = "static"
+          app = "stasis"
+          provisioning-type: "static"
         }
       }
       spec {
