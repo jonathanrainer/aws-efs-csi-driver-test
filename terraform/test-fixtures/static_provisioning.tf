@@ -26,14 +26,14 @@ resource "kubernetes_persistent_volume" "efs_statically_provisioned" {
     persistent_volume_source {
       csi {
         driver        = "efs.csi.aws.com"
-        volume_handle = aws_efs_file_system.test-file-system.id
+        volume_handle = aws_efs_file_system.test_file_system.id
       }
     }
   }
 }
 
 resource "kubernetes_persistent_volume_claim" "efs_statically_provisioned" {
-  depends_on = [kubernetes_persistent_volume.efs_statically_provisioned]
+  depends_on = [aws_efs_mount_target.mount_target]
   metadata {
     name = "efs-statically-provisioned"
     namespace = var.namespace

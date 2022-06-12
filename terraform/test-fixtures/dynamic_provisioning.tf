@@ -8,16 +8,17 @@ resource "kubernetes_storage_class" "dynamic_provisioning_storage_class" {
   }
   parameters = {
     provisioningMode = "efs-ap"
-    fileSystemId = aws_efs_file_system.test-file-system.id
+    fileSystemId = aws_efs_file_system.test_file_system.id
     directoryPerms = "777"
     gidRangeStart: "1000"
     gidRangeEnd: "2000"
     basePath: "/dynamic"
-    extraTags: "SCTag:'Look at the spaces'"
+    extraTags: "SCTag:'Look at the spaces' OverrideMe:bar"
   }
 }
 
 resource "kubernetes_persistent_volume_claim" "efs_dynamically_provisioned" {
+  depends_on = [aws_efs_mount_target.mount_target]
   metadata {
     name      = "efs-dynamically-provisioned"
     namespace = var.namespace
@@ -33,11 +34,6 @@ resource "kubernetes_persistent_volume_claim" "efs_dynamically_provisioned" {
     resources {
       requests = {
         "storage" : "5Gi"
-      }
-    }
-    selector {
-      match_labels = {
-        "access" : "root"
       }
     }
   }

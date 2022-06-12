@@ -2,9 +2,12 @@ import abc
 import base64
 import json
 import subprocess
+from pathlib import Path
 
 import boto3
 import docker
+
+from runner.artefact_builder import HelmBuilder
 
 
 class Cluster:
@@ -71,23 +74,16 @@ class HelmRepository(Repository):
     def get_ecr_url(self):
         return self.get_auth_url() + "/"
 
-    def authenticate_to_registry(self):
+    def push_chart(self, packaged_helm_chart):
         authconfig = self.get_authconfig()
+        repo_url = f"oci://{self.get_ecr_url()}"
         subprocess.run(
             f"echo $HELM_PASSWORD | helm registry login --username $HELM_USER --password-stdin "
-            f"{self.get_ecr_url()}",
-            shell=True, env={
+            f"{self.get_ecr_url()} && helm push \"{packaged_helm_chart}\" {repo_url}",
+            shell=True,  env={
                 "HELM_USER": authconfig['username'],
                 "HELM_PASSWORD": authconfig['password']
             }
-        )
-
-    def push_chart(self, packaged_helm_chart):
-        self.authenticate_to_registry()
-        repo_url = f"oci://{self.get_ecr_url()}"
-        subprocess.run(
-            f"helm push \"{packaged_helm_chart}\" {repo_url}",
-            shell=True
         )
 
 
@@ -137,3 +133,8 @@ class Environment:
 
     def get_vpc(self) -> VirtualPrivateCloud:
         return self._vpc
+
+
+if __name__ == "__main__":
+    hr = HelmRepository("750819418690.dkr.ecr.us-east-2.amazonaws.com/aws-efs-csi-driver")
+    hr.push_chart(Path("/Users/jonathanrainer/Documents/Personal Development/aws-efs-csi-driver/charts/aws-efs-csi-driver-2.2.6+support-tags-with-spaces.1655020303.tgz"))

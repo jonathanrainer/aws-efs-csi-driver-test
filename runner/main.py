@@ -59,6 +59,14 @@ class EnvironmentProvisioner:
         self._infrastructure_provisioner.destroy_test_fixtures(cluster_json, vpc_id, branch)
         self._infrastructure_provisioner.destroy_base_infrastructure(branch)
 
+    def create_fresh_environment(self, new_branch):
+        cluster_json = self._infrastructure_provisioner.get_infrastructure_terraform_output("cluster", "json")
+        vpc_id = self._infrastructure_provisioner.get_infrastructure_terraform_output("vpc_id", "json")
+        branch = self._infrastructure_provisioner.get_test_fixture_terraform_output("namespace", "raw")
+        self._infrastructure_provisioner.destroy_test_fixtures(cluster_json, vpc_id, branch)
+        self._cluster_interface.uninstall_chart(branch, self._kubeconfig_file)
+        self.setup_test_environment(new_branch)
+
 
 if __name__ == "__main__":
     operation = sys.argv[1]
@@ -71,6 +79,9 @@ if __name__ == "__main__":
         case "build":
             branch_name = sys.argv[4]
             ep.setup_test_environment(branch_name)
+        case "new-test":
+            branch_name = sys.argv[4]
+            ep.create_fresh_environment(branch_name)
         case "destroy":
             ep.destroy_test_environment()
 
