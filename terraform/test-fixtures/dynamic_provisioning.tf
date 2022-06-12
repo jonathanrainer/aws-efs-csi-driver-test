@@ -12,8 +12,9 @@ resource "kubernetes_storage_class" "dynamic_provisioning_storage_class" {
     directoryPerms = "777"
     gidRangeStart: "1000"
     gidRangeEnd: "2000"
-    basePath: "/dynamic"
-    extraTags: "SCTag:'Look at the spaces' OverrideMe:bar"
+    basePath: ""
+    ensureUniqueDirectory: "false"
+    subPathPattern: "/dynamic/$${.PVC.name}/foo"
   }
 }
 

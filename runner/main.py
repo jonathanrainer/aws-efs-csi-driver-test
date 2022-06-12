@@ -78,10 +78,10 @@ if __name__ == "__main__":
     match operation:
         case "build":
             branch_name = sys.argv[4]
-            ep.setup_test_environment(branch_name)
+            ep.setup_test_environment(branch_name.lower())
         case "new-test":
             branch_name = sys.argv[4]
-            ep.create_fresh_environment(branch_name)
+            ep.create_fresh_environment(branch_name.lower())
         case "destroy":
             ep.destroy_test_environment()
 
