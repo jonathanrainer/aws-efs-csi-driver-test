@@ -26,14 +26,16 @@ class DockerBuilder(ArtefactBuilder):
         tag = f"v{version}-{branch}.{int(time.time())}"
         self.docker_client.images.build(
             path=driver_repository_path, tag=f"{repository_url}:{tag}", dockerfile="Dockerfile",
-            rm=True
+            rm=True, buildargs={
+                "TARGETARCH": "amd64",
+                "TARGETOS": "linux"
+            }
         )
         self.git_checkout(driver_repository_path, "master")
         return tag
 
 
 class HelmBuilder(ArtefactBuilder):
-
     _yaml_client = ruamel.yaml.YAML()
 
     def build(self, branch, helm_chart_path, image_name, image_tag):
